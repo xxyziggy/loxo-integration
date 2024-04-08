@@ -25,18 +25,20 @@ namespace LoxoIntegration
             HttpRequest req,
             ILogger log)
         {
-            string personId = req.Query["person-id"];
-            if (string.IsNullOrEmpty(personId))
-            {
-                return new BadRequestObjectResult("Missing person-id in query parameters.");
-            }
             
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             string fileUrl = data?.fileUrl;
+            string personId = data?.data?.personID;
+            
             if (string.IsNullOrEmpty(fileUrl))
             {
                 return new BadRequestObjectResult("Missing fileUrl in request body.");
+            }
+            
+            if (string.IsNullOrEmpty(personId))
+            {
+                return new BadRequestObjectResult("Missing personID in request body.");
             }
 
             using var httpClient = new HttpClient();
