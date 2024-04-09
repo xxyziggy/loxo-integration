@@ -61,8 +61,7 @@ namespace LoxoIntegration
             {
                 var fileContent = new ByteArrayContent(fileData);
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                var filename = Path.GetFileName(new Uri(fileUrl).LocalPath);
-                content.Add(fileContent, "document", filename);
+                content.Add(fileContent, "document", $"Filled in form ({DateTime.Now}).pdf");
 
                 var postResponse = await httpClient.PostAsync(
                     $"https://app.loxo.co/api/{_settings.AgencySlug}/people/{personId}/documents", content);
