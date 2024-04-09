@@ -60,8 +60,9 @@ namespace LoxoIntegration
             using (var content = new MultipartFormDataContent())
             {
                 var fileContent = new ByteArrayContent(fileData);
+                var fileName = Uri.EscapeDataString($"Filled in form ({DateTime.Now}).pdf");
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                content.Add(fileContent, "document", $"Filled in form ({DateTime.Now}).pdf");
+                content.Add(fileContent, "document", fileName);
 
                 var postResponse = await httpClient.PostAsync(
                     $"https://app.loxo.co/api/{_settings.AgencySlug}/people/{personId}/documents", content);
