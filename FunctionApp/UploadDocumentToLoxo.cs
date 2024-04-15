@@ -30,6 +30,7 @@ namespace LoxoIntegration
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             string fileUrl = data?.fileUrl;
             string personId = data?.data?.personID;
+            string slug = data?.data?.slug;
             
             if (string.IsNullOrEmpty(fileUrl))
             {
@@ -39,6 +40,11 @@ namespace LoxoIntegration
             if (string.IsNullOrEmpty(personId))
             {
                 return new BadRequestObjectResult("Missing personID in request body.");
+            }
+
+            if (string.IsNullOrEmpty(slug))
+            {
+                return new BadRequestObjectResult("Missing slug in request body.");
             }
 
             using var httpClient = new HttpClient();
@@ -55,7 +61,7 @@ namespace LoxoIntegration
 
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", _settings.BearerToken);
+                new AuthenticationHeaderValue("Bearer", _settings.Tokens[slug]);
 
             using (var content = new MultipartFormDataContent())
             {
@@ -65,7 +71,7 @@ namespace LoxoIntegration
                 content.Add(fileContent, "document", fileName);
 
                 var postResponse = await httpClient.PostAsync(
-                    $"https://app.loxo.co/api/{_settings.AgencySlug}/people/{personId}/documents", content);
+                    $"https://app.loxo.co/api/{slug}/people/{personId}/documents", content);
 
                 if (!postResponse.IsSuccessStatusCode)
                 {

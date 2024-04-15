@@ -1,7 +1,8 @@
-﻿namespace LoxoIntegration;
+﻿using System.Collections.Generic;
+
+namespace LoxoIntegration;
 
 public class LoxoSettings
 {
-    public string AgencySlug { get; set; }
-    public string BearerToken { get; set; }
+    public Dictionary<string, string> Tokens { get; set; }
 }
