@@ -66,7 +66,8 @@ namespace LoxoIntegration
             using (var content = new MultipartFormDataContent())
             {
                 var fileContent = new ByteArrayContent(fileData);
-                var fileName = Uri.EscapeDataString($"Form {DateTime.Now}.pdf");
+                var fileName = $"Form_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}.pdf";
+
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
                 content.Add(fileContent, "document", fileName);
 
