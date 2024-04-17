@@ -116,7 +116,7 @@ namespace LoxoIntegration
             var response = await httpClient.GetAsync(fileUrl);
             if (!response.IsSuccessStatusCode)
             {
-                log.LogError($"Failed to download file. HTTP status code: {response.StatusCode}");
+                log.LogError($"Failed to download file {fileUrl}. HTTP status code: {response.StatusCode}");
                 return null;
             }
 
