@@ -38,27 +38,20 @@ namespace LoxoIntegration
                 return validationResult;
             }
 
-            using var httpClient = CreateHttpClient(data.slug);
-            var personId = await GetPersonId(httpClient, data.slug, data.email, log);
+            using var loxoClient = CreateLoxoHttpClient(data.slug);
+            var personId = await GetPersonId(loxoClient, data.slug, data.email, log);
             if (personId == null)
             {
                 return new StatusCodeResult(StatusCodes.Status404NotFound);
             }
 
-            var fileData = await DownloadFile(httpClient, data.fileUrl, log);
+            var fileData = await DownloadFile(new HttpClient(), data.fileUrl, log);
             if (fileData == null)
             {
                 return new StatusCodeResult(StatusCodes.Status404NotFound);
             }
 
-            var postResult = await PostFile(httpClient, data.slug, personId.Value, fileData, log);
-            if (!postResult)
-            {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
-
-            log.LogInformation("File posted successfully.");
-            return new OkResult();
+            return await PostFile(loxoClient, data.slug, personId.Value, fileData, log);
         }
 
         private async Task<(string fileUrl, string slug, string email)> ParseRequestBody(HttpRequest req)
@@ -88,7 +81,7 @@ namespace LoxoIntegration
             return null;
         }
 
-        private HttpClient CreateHttpClient(string slug)
+        private HttpClient CreateLoxoHttpClient(string slug)
         {
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -125,7 +118,7 @@ namespace LoxoIntegration
             return fileData;
         }
 
-        private async Task<bool> PostFile(HttpClient httpClient, string slug, int personId, byte[] fileData,
+        private async Task<IActionResult> PostFile(HttpClient httpClient, string slug, int personId, byte[] fileData,
             ILogger log)
         {
             var fileContent = new ByteArrayContent(fileData);
@@ -140,10 +133,10 @@ namespace LoxoIntegration
             if (!postResponse.IsSuccessStatusCode)
             {
                 log.LogError($"Failed to post file. HTTP status code: {postResponse.StatusCode}");
-                return false;
+                return new StatusCodeResult((int)postResponse.StatusCode);
             }
 
-            return true;
+            return new OkResult();
         }
     }
 }
